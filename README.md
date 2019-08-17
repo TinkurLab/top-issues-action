@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: adamzolyak/top-issues-action@master
       with:
-      args: apple orange banana
+        args: apple orange banana
 ```
 
 3. Whenever you create an issue, the action will run!

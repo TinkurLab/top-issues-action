@@ -11,8 +11,7 @@ echo $(date)
 npm install
 echo $(date)
 
-echo "printing $*"
-sh -c "docker $*"
+echo "env variables: $*"
 
-node app.js
+node app.js $*
 echo $(date)

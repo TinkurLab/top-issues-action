@@ -1,4 +1,5 @@
 console.log('started nodejs...')
+console.log('env variables in Node:', process.argv)
 
 const helpers = require('./helpers')
 
