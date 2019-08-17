@@ -48,7 +48,9 @@ jobs:
     name: Label Top Issues
     runs-on: ubuntu-latest
     steps:
-    - uses: adamzolyak/top-issues-action@migrateFromProbot
+    - uses: adamzolyak/top-issues-action@master
+      with:
+      args: apple orange banana
 ```
 
 3. Whenever you create an issue, the action will run!
