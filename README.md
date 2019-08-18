@@ -24,19 +24,6 @@ To setup this action:
 2. Add the following code to the `main.workflow` file and commit it to the repo's `master` branch.
 
 ```
-workflow "Top Issues Labeler" {
-  on = "schedule(* * * * *)"
-  resolves = ["Label Top Issues"]
-}
-
-action "Label Top Issues" {
-  uses = "adamzolyak/top-issues-action@migrateFromProbot"
-  args = ["apple", "banana", "orange"]
-  secrets = ["GITHUB_TOKEN"]
-}
-```
-
-```
 name: Label Top Issues
 
 on:
@@ -50,7 +37,7 @@ jobs:
     steps:
     - uses: adamzolyak/top-issues-action@master
       with:
-        args: apple orange banana
+        args: "5" "Top Issue 2 3 4!" "f442c2"
 ```
 
 3. Whenever you create an issue, the action will run!

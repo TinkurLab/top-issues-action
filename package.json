@@ -26,6 +26,7 @@
   },
   "homepage": "https://www.tinkurlab.com",
   "dependencies": {
+    "@octokit/request": "^5.0.2",
     "@octokit/rest": "^16.28.7"
   },
   "devDependencies": {

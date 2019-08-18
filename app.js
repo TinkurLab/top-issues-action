@@ -1,5 +1,4 @@
 console.log('started nodejs...')
-console.log('env variables in Node:', process.argv)
 
 const helpers = require('./helpers')
 
@@ -10,21 +9,56 @@ const octokit = new Octokit({
   auth: `token ${process.env.GITHUB_TOKEN}`
 })
 
+//set variables from args
+const numIssuesToLabel = process.argv[2] ? process.argv[2] : 5
+const eventLabelName = process.argv[2]
+  ? process.argv[3]
+  : ':thumbsup: Top Issue!'
+const eventLabelColor = process.argv[4] ? process.argv[4] : 'f442c2'
+
+console.log('eventLabelName', eventLabelName)
+
 //set eventOwner and eventRepo based on action's env variables
 const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY
 const eventOwner = helpers.getOwner(eventOwnerAndRepo)
 const eventRepo = helpers.getRepo(eventOwnerAndRepo)
 
 async function labelTopIssues() {
-  //read contents of action's event.json
-  const eventData = await helpers.readFilePromise(
-    '..' + process.env.GITHUB_EVENT_PATH
-  )
-  const eventJSON = JSON.parse(eventData)
-
   console.log('break 1')
 
-  console.log(eventJSON)
+  await helpers.createLabelInRepo(
+    octokit,
+    eventOwner,
+    eventRepo,
+    eventLabelName,
+    eventLabelColor
+  )
+
+  let issuesToLabel = await helpers.getTopIssues(
+    octokit,
+    eventOwner,
+    eventRepo,
+    '+1',
+    numIssuesToLabel
+  )
+
+  issuesToLabel.forEach(issue => {
+    helpers.addLabelToIssue(
+      octokit,
+      eventOwner,
+      eventRepo,
+      issue,
+      eventLabelName
+    )
+  })
+
+  helpers.pruneOldLabels(
+    octokit,
+    eventOwner,
+    eventRepo,
+    issuesToLabel,
+    eventLabelName
+  )
 }
 
 //run the function
