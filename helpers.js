@@ -22,6 +22,28 @@ module.exports.getRepo = function(eventOwnerAndRepo) {
   return eventOwnerAndRepo.slice(slicePos1 + 1, eventOwnerAndRepo.length)
 }
 
+module.exports.getIssues = async function(eventOwner, eventRepo, label) {
+  const filterLabel = label ? label : null
+
+  let res = await request(`GET /repos/${eventOwner}/${eventRepo}/issues`, {
+    headers: {
+      authorization: `token ${process.env.GITHUB_TOKEN}`,
+      accept: 'application/vnd.github.squirrel-girl-preview'
+    },
+    labels: [filterLabel]
+  })
+
+  res = res.data
+
+  res = res.filter(issue => {
+    if (!issue.pull_request) {
+      return true
+    }
+  })
+
+  return res
+}
+
 module.exports.createLabelInRepo = async function(
   octokit,
   eventOwner,
@@ -124,23 +146,7 @@ module.exports.getTopIssues = async function(
   reaction,
   count
 ) {
-  const options = octokit.issues.listForRepo.endpoint.merge({
-    owner: eventOwner,
-    repo: eventRepo
-  })
-
-  let allIssues = await request(
-    `GET /repos/${eventOwner}/${eventRepo}/issues`,
-    {
-      headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`,
-        accept: 'application/vnd.github.squirrel-girl-preview'
-      },
-      org: 'octokit'
-    }
-  )
-
-  allIssues = allIssues.data
+  let allIssues = await exports.getIssues(eventOwner, eventRepo)
 
   allIssues = allIssues.filter(issue => {
     if (!issue.pull_request) {
@@ -166,22 +172,7 @@ module.exports.pruneOldLabels = async function(
   issuesToLabel,
   label
 ) {
-  const options = octokit.issues.listForRepo.endpoint.merge({
-    owner: eventOwner,
-    repo: eventRepo,
-    labels: [label]
-  })
-
-  let issuesWithLabel = await octokit
-    .paginate(options)
-    .then(data => {
-      return data
-    })
-    .catch(err => {
-      console.log(err)
-    })
-
-  issuesWithLabel.filter(issue => issue.pull_request === undefined)
+  let issuesWithLabel = await exports.getIssues(eventOwner, eventRepo, label)
 
   let keepLabel
 
