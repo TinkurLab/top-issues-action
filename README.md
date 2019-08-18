@@ -1,4 +1,4 @@
-# 👍 Top Issues Labeler - GitHub Action
+# 👍 Top Issues Labeler - GitHub Action (Work In Progress)
 
 A [GitHub Action](https://github.com/features/actions) that labels issues with the most 👍s (+1s) in your repo.
 
