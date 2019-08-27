@@ -3,4 +3,8 @@ export GITHUB_TOKEN="12345"
 export GITHUB_REPOSITORY="adamzolyak/actions-playground"
 export GITHUB_EVENT_PATH="/issue-labeler-action/tests/fixtures/actionTrigger.json"
 
+export TOP_NUMBER_OF_ISSUES="0"  
+export TOP_LABEL_NAME="👍 Top 10 Issue!"
+export TOP_LABEL_COLOR="ffffff"
+
 node index.js
