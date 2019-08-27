@@ -9,15 +9,23 @@ const octokit = new Octokit({
   auth: `token ${process.env.GITHUB_TOKEN}`
 })
 
-//set variables from args
-let allArgs = process.argv[2]
-  ? process.argv[2].split('|')
-  : '10|👍 Top 10 Issue!|f442c2'.split('|')
-const numIssuesToLabel = allArgs[0]
-const eventLabelName = allArgs[1]
-const eventLabelColor = allArgs[2]
+//set variables
+const numIssuesToLabel = process.env.TOP_NUMBER_OF_ISSUES
+  ? process.env.TOP_NUMBER_OF_ISSUES
+  : '10'
+const eventLabelName = process.env.TOP_LABEL_NAME
+  ? process.env.TOP_LABEL_NAME
+  : '👍 Top 10 Issue'
+const eventLabelColor = process.env.TOP_LABEL_COLOR
+  ? process.env.TOP_LABEL_COLOR
+  : 'f442c2'
 
-console.log('mapped args: ', numIssuesToLabel, eventLabelName, eventLabelColor)
+console.log('Args: ', numIssuesToLabel, eventLabelName, eventLabelColor)
+console.log(
+  'GITHUB_TOKEN: ',
+  process.env.GITHUB_TOKEN ? 'true' : 'false',
+  process.env.GITHUB_TOKEN.slice(0, 5)
+)
 
 //set eventOwner and eventRepo based on action's env variables
 const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY

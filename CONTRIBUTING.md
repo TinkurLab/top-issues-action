@@ -30,7 +30,11 @@ Test Status: [![CircleCI](https://circleci.com/gh/adamzolyak/issue-labeler-actio
 export GITHUB_TOKEN="12345"
 export GITHUB_REPOSITORY="adamzolyak/actions-playground"
 
-node app.js "3" "Hat 🧢" "ffcc33"
+export TOP_NUMBER_OF_ISSUES="10"
+export TOP_LABEL_NAME="👍 Top 10 Issue!"
+export TOP_LABEL_COLOR="f442c2"
+
+node app.js
 ```
 
 5. modify contents of [/tests/fixtures/actionTrigger.json](./tests/fixtures/actionTrigger.json) as needed for test data

@@ -36,8 +36,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: adamzolyak/top-issues-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: "10|👍 Top 10 Issue!|f442c2"
+        TOP_NUMBER_OF_ISSUES="10"
+        TOP_LABEL_NAME="👍 Top 10 Issue!"
+        TOP_LABEL_COLOR="f442c2"
 ```
 
 Update `args` with the desired values for `args: "<number_of_issues_to_label>" "<label_name>" "<label_color>"`
