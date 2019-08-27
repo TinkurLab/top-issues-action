@@ -35,7 +35,8 @@ jobs:
     name: Label Top Issues
     runs-on: ubuntu-latest
     steps:
-    - uses: adamzolyak/top-issues-action@master
+    - name: Label Issues
+      uses: adamzolyak/top-issues-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
