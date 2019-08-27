@@ -29,9 +29,8 @@ Test Status: [![CircleCI](https://circleci.com/gh/adamzolyak/issue-labeler-actio
 ```bash
 export GITHUB_TOKEN="12345"
 export GITHUB_REPOSITORY="adamzolyak/actions-playground"
-export GITHUB_EVENT_PATH="/issue-labeler-action/tests/fixtures/actionTrigger.json"
 
-node app.js
+node app.js "3" "Hat 🧢" "ffcc33"
 ```
 
 5. modify contents of [/tests/fixtures/actionTrigger.json](./tests/fixtures/actionTrigger.json) as needed for test data

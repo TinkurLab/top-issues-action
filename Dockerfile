@@ -2,7 +2,7 @@ FROM node:8-slim
 
 LABEL "com.github.actions.name"="Top Issues Labeler"
 LABEL "com.github.actions.description"="Labels issies with the most +1s"
-LABEL "com.github.actions.icon"="tag"
+LABEL "com.github.actions.icon"="arrow-up"
 LABEL "com.github.actions.color"="green"
 
 LABEL "repository"="http://github.com/adamzolyak/top-issues-action"
