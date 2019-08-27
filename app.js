@@ -44,7 +44,7 @@ async function labelTopIssues() {
     )
   })
 
-  const issuesToPruneLabel = await helpers.getIssues(
+  const issuesWithLabel = await helpers.getIssues(
     eventOwner,
     eventRepo,
     eventLabelName
@@ -54,7 +54,8 @@ async function labelTopIssues() {
     octokit,
     eventOwner,
     eventRepo,
-    issuesToPruneLabel,
+    issuesToLabel,
+    issuesWithLabel,
     eventLabelName
   )
 }

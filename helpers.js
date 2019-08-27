@@ -112,33 +112,6 @@ module.exports.addLabelToIssue = function(
   }
 }
 
-module.exports.removeLabelFromIssue = function(
-  octokit,
-  eventOwner,
-  eventRepo,
-  issue,
-  labelToRemove
-) {
-  let existingLabels = issue.labels
-
-  let labelAlreadyOnIssue = false
-
-  existingLabels.forEach(label => {
-    if (label.name === labelToRemove) {
-      labelAlreadyOnIssue = true
-    }
-  })
-
-  if (labelAlreadyOnIssue) {
-    octokit.issues.removeLabel({
-      owner: eventOwner,
-      repo: eventRepo,
-      number: issue.number,
-      name: labelToRemove
-    })
-  }
-}
-
 module.exports.getTopIssues = async function(issues, reaction, count) {
   let topIssues = issues
 
@@ -156,8 +129,6 @@ module.exports.getTopIssues = async function(issues, reaction, count) {
     topIssues = topIssues.slice(0, count)
   }
 
-  console.log('topIssues: ', topIssues)
-
   return topIssues
 }
 
@@ -165,17 +136,16 @@ module.exports.pruneOldLabels = async function(
   octokit,
   eventOwner,
   eventRepo,
-  issuesToPruneLabel,
+  issuesToLabel,
+  issuesWithLabel,
   label
 ) {
-  let issuesWithLabel = issuesToPruneLabel
-
   let keepLabel
 
   issuesWithLabel.forEach(labeledIssue => {
     keepLabel = false
 
-    issuesToPruneLabel.forEach(issueToLabel => {
+    issuesToLabel.forEach(issueToLabel => {
       if (issueToLabel.number === labeledIssue.number) {
         keepLabel = true
       }

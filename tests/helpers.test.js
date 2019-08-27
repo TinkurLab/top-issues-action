@@ -144,63 +144,6 @@ describe('addLabelToIssue', () => {
     })
 })
 
-describe('removeLabelFromIssue', () => {
-  it('removes label from issue if issue has the label', async () => {
-    const issue = {
-      labels: [
-        {
-          name: 'label 1'
-        },
-        { name: 'label 2' }
-      ]
-    }
-
-    let octokit = {
-      issues: {
-        removeLabel: jest.fn()
-      }
-    }
-
-    const result = await helpers.removeLabelFromIssue(
-      octokit,
-      'adamzolyak',
-      'actions-playground',
-      issue,
-      'label 1'
-    )
-
-    expect(octokit.issues.removeLabel).toHaveBeenCalledTimes(1)
-  }),
-    it('does not remove label from issue if issue does not have the label', async () => {
-      const issue = {
-        labels: [
-          {
-            name: 'label 1'
-          },
-          {
-            name: 'label 2'
-          }
-        ]
-      }
-
-      let octokit = {
-        issues: {
-          removeLabel: jest.fn()
-        }
-      }
-
-      const result = await helpers.removeLabelFromIssue(
-        octokit,
-        'adamzolyak',
-        'actions-playground',
-        issue,
-        'label 3'
-      )
-
-      expect(octokit.issues.removeLabel).toHaveBeenCalledTimes(0)
-    })
-})
-
 describe('getTopIssues', () => {
   it('gets 3 top issues order from most to least reactions', async () => {
     const issues = [
@@ -307,4 +250,93 @@ describe('getTopIssues', () => {
       expect(result[1].title).toBe('blue')
       expect(result).toHaveLength(2)
     })
+})
+
+describe('pruneOldLabels', () => {
+  it('removes labels from issues that are no longer top issues that have the top issue label', async () => {
+    const issuesToLabel = [
+      {
+        number: 10,
+        title: 'orange',
+        labels: [
+          {
+            name: 'label 1'
+          }
+        ],
+        reactions: {
+          '+1': 3
+        }
+      },
+      {
+        number: 11,
+        title: 'blue',
+        labels: [
+          {
+            name: 'label 1'
+          }
+        ],
+        reactions: {
+          '+1': 2
+        }
+      }
+    ]
+
+    const issuesWithLabel = [
+      {
+        number: 11,
+        title: 'blue',
+        labels: [
+          {
+            name: 'label 1'
+          }
+        ],
+        reactions: {
+          '+1': 2
+        }
+      },
+      {
+        number: 12,
+        title: 'aqua',
+        labels: [
+          {
+            name: 'label 1'
+          }
+        ],
+        reactions: {
+          '+1': 1
+        }
+      },
+      {
+        number: 13,
+        title: 'brown',
+        labels: [
+          {
+            name: 'label 1'
+          }
+        ],
+        reactions: {
+          '+1': 1
+        }
+      }
+    ]
+
+    let octokit = {
+      issues: {
+        removeLabel: jest.fn()
+      }
+    }
+
+    const result = await helpers.pruneOldLabels(
+      octokit,
+      'adamzolyak',
+      'actions-playground',
+      issuesToLabel,
+      issuesWithLabel,
+      'label 1'
+    )
+
+    expect(octokit.issues.removeLabel).toHaveBeenCalledTimes(2)
+    expect(octokit.issues.removeLabel.mock.calls[0][0].issue_number).toBe(12)
+    expect(octokit.issues.removeLabel.mock.calls[1][0].issue_number).toBe(13)
+  })
 })
