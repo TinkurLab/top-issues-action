@@ -21,11 +21,7 @@ const eventLabelColor = process.env.TOP_LABEL_COLOR
   : 'f442c2'
 
 console.log('Args: ', numIssuesToLabel, eventLabelName, eventLabelColor)
-console.log(
-  'GITHUB_TOKEN: ',
-  process.env.GITHUB_TOKEN ? 'true' : 'false',
-  process.env.GITHUB_TOKEN.slice(0, 5)
-)
+console.log('process.env: ', process.env)
 
 //set eventOwner and eventRepo based on action's env variables
 const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY
