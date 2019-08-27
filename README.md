@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: adamzolyak/top-issues-action@master
       with:
-        args: "5" "👍 Top 10 Issue!" "f442c2"
+        args: "10|👍 Top 10 Issue!|f442c2"
 ```
 
 Update `args` with the desired values for `args: "<number_of_issues_to_label>" "<label_name>" "<label_color>"`
