@@ -18,116 +18,293 @@ describe('getRepo', () => {
   })
 })
 
-describe('getBulkLabels', async () => {
-  it('should return 1 bulk label if 1 bulk label exist in the issue body', async () => {
-    const eventIssueBody = 'checklist\r\n- [ ] to do\r\n[bug]'
-    const result = helpers.getBulkLabels(eventIssueBody)
+describe('createLabelInRepo', () => {
+  it('creates label in repo if label does not already exist', async () => {
+    const repoLabels = [
+      {
+        name: 'label 1'
+      },
+      { name: 'label 2' }
+    ]
 
-    expect(Array.isArray(['bug'])).toBe(true)
-  })
-
-  it('should return 2 bulk labels if 2 bulk labels exist in the issue body', async () => {
-    const eventIssueBody = 'checklist\r\n- [ ] to do\r\n[bug, enh]'
-    const result = helpers.getBulkLabels(eventIssueBody)
-
-    expect(Array.isArray(['bug', 'enh'])).toBe(true)
-  })
-
-  it('should return 0 bulk labels if 0 bulk labels exist in the issue body', async () => {
-    const eventIssueBody = 'checklist\r\n- [ ] to do\r\n'
-    const result = helpers.getBulkLabels(eventIssueBody)
-
-    expect(Array.isArray([])).toBe(true)
-  })
-})
-
-describe('addLabel', () => {
-  it('should add label to issue', async () => {
     let octokit = {
       issues: {
-        addLabels: jest.fn().mockResolvedValue({ something: 'something' })
-      }
+        listLabelsForRepo: {
+          endpoint: {
+            merge: jest.fn().mockResolvedValue(repoLabels)
+          }
+        },
+        createLabel: jest.fn()
+      },
+      paginate: jest.fn().mockResolvedValue(repoLabels)
     }
 
-    const result = await helpers.addLabel(
+    const result = await helpers.createLabelInRepo(
       octokit,
       'adamzolyak',
       'actions-playground',
-      '1',
-      'Incomplete Tasks'
+      'new label',
+      '#ffffff'
     )
+
+    expect(
+      octokit.issues.listLabelsForRepo.endpoint.merge
+    ).toHaveBeenCalledTimes(1)
+    expect(octokit.paginate).toHaveBeenCalledTimes(1)
+    expect(octokit.issues.createLabel).toHaveBeenCalledTimes(1)
+  }),
+    it('does not create label in repo if label already exists', async () => {
+      const repoLabels = [
+        {
+          name: 'label 1'
+        },
+        { name: 'label 2' }
+      ]
+
+      let octokit = {
+        issues: {
+          listLabelsForRepo: {
+            endpoint: {
+              merge: jest.fn().mockResolvedValue(repoLabels)
+            }
+          },
+          createLabel: jest.fn()
+        },
+        paginate: jest.fn().mockResolvedValue(repoLabels)
+      }
+
+      const result = await helpers.createLabelInRepo(
+        octokit,
+        'adamzolyak',
+        'actions-playground',
+        'label 2',
+        '#ffffff'
+      )
+
+      expect(
+        octokit.issues.listLabelsForRepo.endpoint.merge
+      ).toHaveBeenCalledTimes(1)
+      expect(octokit.paginate).toHaveBeenCalledTimes(1)
+      expect(octokit.issues.createLabel).toHaveBeenCalledTimes(0)
+    })
+})
+
+describe('addLabelToIssue', () => {
+  it('adds label to issue if issue does not already have label', async () => {
+    const issue = {
+      labels: [
+        {
+          name: 'label 1'
+        },
+        { name: 'label 2' }
+      ]
+    }
+
+    let octokit = {
+      issues: {
+        addLabels: jest.fn()
+      }
+    }
+
+    const result = await helpers.addLabelToIssue(
+      octokit,
+      'adamzolyak',
+      'actions-playground',
+      issue,
+      'label 3'
+    )
+
     expect(octokit.issues.addLabels).toHaveBeenCalledTimes(1)
-    expect(octokit.issues.addLabels.mock.calls[0][0].labels).toEqual([
-      'Incomplete Tasks'
-    ])
-  })
+  }),
+    it('does not add label to issue if issue already has label', async () => {
+      const issue = {
+        labels: [
+          {
+            name: 'label 1'
+          },
+          { name: 'label 2' }
+        ]
+      }
+
+      let octokit = {
+        issues: {
+          addLabels: jest.fn()
+        }
+      }
+
+      const result = await helpers.addLabelToIssue(
+        octokit,
+        'adamzolyak',
+        'actions-playground',
+        issue,
+        'label 1'
+      )
+
+      expect(octokit.issues.addLabels).toHaveBeenCalledTimes(0)
+    })
 })
 
-describe('getRepoLabels', () => {
-  it('should return an array of 2 labels if 2 labels exist in repo', async () => {
-    const repoLabels = [
-      {
-        name: 'bug'
-      },
-      {
-        name: 'enhancement'
-      }
-    ]
+describe('removeLabelFromIssue', () => {
+  it('removes label from issue if issue has the label', async () => {
+    const issue = {
+      labels: [
+        {
+          name: 'label 1'
+        },
+        { name: 'label 2' }
+      ]
+    }
+
     let octokit = {
       issues: {
-        listLabelsForRepo: jest.fn().mockResolvedValue({ data: repoLabels })
+        removeLabel: jest.fn()
       }
     }
 
-    const result = await helpers.getRepoLabels(
+    const result = await helpers.removeLabelFromIssue(
       octokit,
       'adamzolyak',
-      'actions-playground'
+      'actions-playground',
+      issue,
+      'label 1'
     )
 
-    expect(octokit.issues.listLabelsForRepo).toHaveBeenCalledTimes(1)
-    expect(result).toBe(repoLabels)
-  })
-
-  it('should return an array of 0 labels if 0 labels exist in repo', async () => {
-    const repoLabels = []
-    let octokit = {
-      issues: {
-        listLabelsForRepo: jest.fn().mockResolvedValue({ data: repoLabels })
+    expect(octokit.issues.removeLabel).toHaveBeenCalledTimes(1)
+  }),
+    it('does not remove label from issue if issue does not have the label', async () => {
+      const issue = {
+        labels: [
+          {
+            name: 'label 1'
+          },
+          {
+            name: 'label 2'
+          }
+        ]
       }
-    }
 
-    const result = await helpers.getRepoLabels(
-      octokit,
-      'adamzolyak',
-      'actions-playground'
-    )
+      let octokit = {
+        issues: {
+          removeLabel: jest.fn()
+        }
+      }
 
-    expect(octokit.issues.listLabelsForRepo).toHaveBeenCalledTimes(1)
-    expect(result).toBe(repoLabels)
-  })
+      const result = await helpers.removeLabelFromIssue(
+        octokit,
+        'adamzolyak',
+        'actions-playground',
+        issue,
+        'label 3'
+      )
+
+      expect(octokit.issues.removeLabel).toHaveBeenCalledTimes(0)
+    })
 })
 
-describe('addShortLabelName', () => {
-  it('should return an array of labels with a shortLabelName property for each label', async () => {
-    const repoLabels = [
+describe('getTopIssues', () => {
+  it('gets 3 top issues order from most to least reactions', async () => {
+    const issues = [
       {
-        name: 'bug'
+        number: 10,
+        title: 'orange',
+        reactions: {
+          '+1': 3
+        }
       },
       {
-        name: 'enhancement'
+        number: 11,
+        title: 'blue',
+        reactions: {
+          '+1': 4
+        }
+      },
+      {
+        number: 12,
+        title: 'red',
+        reactions: {
+          '+1': 5
+        }
+      },
+      {
+        number: 13,
+        title: 'green',
+        reactions: {
+          '+1': 2
+        }
+      },
+      {
+        number: 14,
+        title: 'purple',
+        reactions: {
+          '+1': 0
+        }
+      },
+      {
+        number: 15,
+        title: 'black',
+        reactions: {
+          '+1': 1
+        }
       }
     ]
 
-    const result = await helpers.addShortLabelName(repoLabels)
+    const result = await helpers.getTopIssues(issues, '+1', '3')
 
-    expect(result[0].shortLabelName).toBe('bug')
-  })
+    expect(result[0].title).toBe('red')
+    expect(result[1].title).toBe('blue')
+    expect(result[2].title).toBe('orange')
+    expect(result).toHaveLength(3)
+  }),
+    it('gets 2 top issues order from most to least reactions', async () => {
+      const issues = [
+        {
+          number: 10,
+          title: 'orange',
+          reactions: {
+            '+1': 3
+          }
+        },
+        {
+          number: 11,
+          title: 'blue',
+          reactions: {
+            '+1': 4
+          }
+        },
+        {
+          number: 12,
+          title: 'red',
+          reactions: {
+            '+1': 5
+          }
+        },
+        {
+          number: 13,
+          title: 'green',
+          reactions: {
+            '+1': 2
+          }
+        },
+        {
+          number: 14,
+          title: 'purple',
+          reactions: {
+            '+1': 0
+          }
+        },
+        {
+          number: 15,
+          title: 'black',
+          reactions: {
+            '+1': 1
+          }
+        }
+      ]
 
-  it('should return an array of 0 labels if 0 labels exist in repo', async () => {
-    const repoLabels = []
+      const result = await helpers.getTopIssues(issues, '+1', '2')
 
-    const result = await helpers.addShortLabelName(repoLabels)
-    expect(result.length).toBe(0)
-  })
+      expect(result[0].title).toBe('red')
+      expect(result[1].title).toBe('blue')
+      expect(result).toHaveLength(2)
+    })
 })

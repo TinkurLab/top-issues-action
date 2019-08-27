@@ -22,8 +22,6 @@ const eventOwner = helpers.getOwner(eventOwnerAndRepo)
 const eventRepo = helpers.getRepo(eventOwnerAndRepo)
 
 async function labelTopIssues() {
-  console.log('break 1')
-
   await helpers.createLabelInRepo(
     octokit,
     eventOwner,
@@ -32,13 +30,9 @@ async function labelTopIssues() {
     eventLabelColor
   )
 
-  let issuesToLabel = await helpers.getTopIssues(
-    octokit,
-    eventOwner,
-    eventRepo,
-    '+1',
-    numIssuesToLabel
-  )
+  const issues = await helpers.getIssues(eventOwner, eventRepo)
+
+  let issuesToLabel = await helpers.getTopIssues(issues, '+1', numIssuesToLabel)
 
   issuesToLabel.forEach(issue => {
     helpers.addLabelToIssue(
@@ -50,11 +44,17 @@ async function labelTopIssues() {
     )
   })
 
+  const issuesToPruneLabel = await helpers.getIssues(
+    eventOwner,
+    eventRepo,
+    eventLabelName
+  )
+
   helpers.pruneOldLabels(
     octokit,
     eventOwner,
     eventRepo,
-    issuesToLabel,
+    issuesToPruneLabel,
     eventLabelName
   )
 }

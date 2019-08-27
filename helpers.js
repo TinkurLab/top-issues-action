@@ -94,15 +94,15 @@ module.exports.addLabelToIssue = function(
 ) {
   let existingLabels = issue.labels
 
-  let labelAlreadyExists = false
+  let labelAlreadyOnIssue = false
 
   existingLabels.forEach(label => {
     if (label.name === labelToAdd) {
-      labelAlreadyExists = true
+      labelAlreadyOnIssue = true
     }
   })
 
-  if (!labelAlreadyExists) {
+  if (!labelAlreadyOnIssue) {
     octokit.issues.addLabels({
       owner: eventOwner,
       repo: eventRepo,
@@ -121,15 +121,15 @@ module.exports.removeLabelFromIssue = function(
 ) {
   let existingLabels = issue.labels
 
-  let labelAlreadyExists = false
+  let labelAlreadyOnIssue = false
 
   existingLabels.forEach(label => {
     if (label.name === labelToRemove) {
-      labelAlreadyExists = true
+      labelAlreadyOnIssue = true
     }
   })
 
-  if (labelAlreadyExists) {
+  if (labelAlreadyOnIssue) {
     octokit.issues.removeLabel({
       owner: eventOwner,
       repo: eventRepo,
@@ -139,47 +139,43 @@ module.exports.removeLabelFromIssue = function(
   }
 }
 
-module.exports.getTopIssues = async function(
-  octokit,
-  eventOwner,
-  eventRepo,
-  reaction,
-  count
-) {
-  let allIssues = await exports.getIssues(eventOwner, eventRepo)
+module.exports.getTopIssues = async function(issues, reaction, count) {
+  let topIssues = issues
 
-  allIssues = allIssues.filter(issue => {
+  topIssues = topIssues.filter(issue => {
     if (!issue.pull_request) {
       return true
     }
   })
 
-  allIssues.sort(
+  topIssues.sort(
     (a, b) => parseInt(b.reactions[reaction]) - parseInt(a.reactions[reaction])
   )
 
-  if (allIssues.length >= count) {
-    allIssues = allIssues.slice(0, count)
+  if (topIssues.length >= count) {
+    topIssues = topIssues.slice(0, count)
   }
 
-  return allIssues
+  console.log('topIssues: ', topIssues)
+
+  return topIssues
 }
 
 module.exports.pruneOldLabels = async function(
   octokit,
   eventOwner,
   eventRepo,
-  issuesToLabel,
+  issuesToPruneLabel,
   label
 ) {
-  let issuesWithLabel = await exports.getIssues(eventOwner, eventRepo, label)
+  let issuesWithLabel = issuesToPruneLabel
 
   let keepLabel
 
   issuesWithLabel.forEach(labeledIssue => {
     keepLabel = false
 
-    issuesToLabel.forEach(issueToLabel => {
+    issuesToPruneLabel.forEach(issueToLabel => {
       if (issueToLabel.number === labeledIssue.number) {
         keepLabel = true
       }
