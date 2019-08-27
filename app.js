@@ -35,6 +35,7 @@ async function labelTopIssues() {
   let issuesToLabel = await helpers.getTopIssues(issues, '+1', numIssuesToLabel)
 
   issuesToLabel.forEach(issue => {
+    console.log('issue: ', issue)
     helpers.addLabelToIssue(
       octokit,
       eventOwner,

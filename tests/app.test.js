@@ -3,178 +3,92 @@ const helpers = require('../helpers')
 
 jest.mock('../helpers')
 
-describe('checklistChecker', () => {
+describe('labelTopIssues', () => {
   afterEach(() => {
     jest.resetAllMocks()
   })
 
-  it('should add 1 label on issue opened event if there is 1 bulk label', async () => {
-    let eventData, repoLabels
-    helpers.readFilePromise = jest.fn(() => eventData)
-    helpers.getBulkLabels = jest.fn(() => bulkLabels)
-    helpers.getRepoLabels = jest.fn(() => repoLabels)
-    helpers.addShortLabelName = jest.fn(() => repoShortLabels)
-    helpers.addLabel = jest.fn()
-    eventData = `{
-            "action": "opened",
-            "issue": {
-                "id": 376593094,
-                "number": 19,
-                "title": "newissue3",
-                "state": "open",
-                "body": "to do\\r\\n- [ ] thing\\r\\n- [x] thing\\r\\n\\r\\n[bug]"
-            }
-        }`
-    bulkLabels = ['bug']
-    repoLabels = `[
-            {
-              "name": "bug"
-            },
-            {
-              "name": "enhancement"
-            }
-          ]`
-    repoShortLabels = [
+  it('should label top 3 issues', async () => {
+    helpers.createLabelInRepo = jest.fn()
+    helpers.getIssues = jest.fn(() => issues)
+    helpers.getTopIssues = jest.fn(() => topIssues)
+    helpers.addLabelToIssue = jest.fn()
+    helpers.pruneOldLabels = jest.fn()
+
+    const issues = [
       {
-        name: 'bug',
-        shortLabelName: 'bug'
+        number: 10,
+        title: 'orange',
+        reactions: {
+          '+1': 3
+        }
       },
       {
-        name: 'enhancement',
-        shortLabelName: 'enh'
-      }
-    ]
-
-    await app.bulkLabelAdd()
-
-    expect(helpers.readFilePromise).toHaveBeenCalledTimes(1)
-    expect(helpers.getBulkLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.getRepoLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.addShortLabelName).toHaveBeenCalledTimes(1)
-    expect(helpers.addLabel).toHaveBeenCalledTimes(1)
-  })
-
-  it('should add 2 labels on issue opened event if there are 2 bulk labels', async () => {
-    let eventData, repoLabels
-    helpers.readFilePromise = jest.fn(() => eventData)
-    helpers.getBulkLabels = jest.fn(() => bulkLabels)
-    helpers.getRepoLabels = jest.fn(() => repoLabels)
-    helpers.addShortLabelName = jest.fn(() => repoShortLabels)
-    helpers.addLabel = jest.fn()
-    eventData = `{
-            "action": "opened",
-            "issue": {
-                "id": 376593094,
-                "number": 19,
-                "title": "newissue3",
-                "state": "open",
-                "body": "to do\\r\\n- [ ] thing\\r\\n- [x] thing\\r\\n\\r\\n[bug, enh]"
-            }
-        }`
-    bulkLabels = ['bug', 'enh']
-    repoLabels = `[
-            {
-              "name": "bug"
-            },
-            {
-              "name": "enhancement"
-            }
-          ]`
-    repoShortLabels = [
-      {
-        name: 'bug',
-        shortLabelName: 'bug'
+        number: 11,
+        title: 'blue',
+        reactions: {
+          '+1': 4
+        }
       },
       {
-        name: 'enhancement',
-        shortLabelName: 'enh'
-      }
-    ]
-
-    await app.bulkLabelAdd()
-
-    expect(helpers.readFilePromise).toHaveBeenCalledTimes(1)
-    expect(helpers.getBulkLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.getRepoLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.addShortLabelName).toHaveBeenCalledTimes(1)
-    expect(helpers.addLabel).toHaveBeenCalledTimes(2)
-  })
-
-  it('should NOT add a label on issue opened event if the bulk label does NOT exist in the repo', async () => {
-    let eventData, repoLabels
-    helpers.readFilePromise = jest.fn(() => eventData)
-    helpers.getBulkLabels = jest.fn(() => bulkLabels)
-    helpers.getRepoLabels = jest.fn(() => repoLabels)
-    helpers.addShortLabelName = jest.fn(() => repoShortLabels)
-    helpers.addLabel = jest.fn()
-    eventData = `{
-            "action": "opened",
-            "issue": {
-                "id": 376593094,
-                "number": 19,
-                "title": "newissue3",
-                "state": "open",
-                "body": "to do\\r\\n- [ ] thing\\r\\n- [x] thing\\r\\n\\r\\n[bug]"
-            }
-        }`
-    bulkLabels = ['bug']
-    repoLabels = `[
-            {
-              "name": "enhancement"
-            }
-          ]`
-    repoShortLabels = [
+        number: 12,
+        title: 'red',
+        reactions: {
+          '+1': 5
+        }
+      },
       {
-        name: 'enhancement',
-        shortLabelName: 'enh'
-      }
-    ]
-
-    await app.bulkLabelAdd()
-
-    expect(helpers.readFilePromise).toHaveBeenCalledTimes(1)
-    expect(helpers.getBulkLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.getRepoLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.addShortLabelName).toHaveBeenCalledTimes(1)
-    expect(helpers.addLabel).toHaveBeenCalledTimes(0)
-  })
-
-  it('should NOT add a label on issue opened event if there is no bulk label', async () => {
-    let eventData, repoLabels
-    helpers.readFilePromise = jest.fn(() => eventData)
-    helpers.getBulkLabels = jest.fn(() => bulkLabels)
-    helpers.getRepoLabels = jest.fn(() => repoLabels)
-    helpers.addShortLabelName = jest.fn(() => repoShortLabels)
-    helpers.addLabel = jest.fn()
-    eventData = `{
-            "action": "opened",
-            "issue": {
-                "id": 376593094,
-                "number": 19,
-                "title": "newissue3",
-                "state": "open",
-                "body": "to do\\r\\n- [ ] thing\\r\\n- [x] thing\\r\\n\\r\\n"
-            }
-        }`
-    bulkLabels = []
-    repoLabels = `[
-            {
-              "name": "enhancement"
-            }
-          ]`
-    repoShortLabels = [
+        number: 13,
+        title: 'green',
+        reactions: {
+          '+1': 2
+        }
+      },
       {
-        name: 'enhancement',
-        shortLabelName: 'enh'
+        number: 14,
+        title: 'purple',
+        reactions: {
+          '+1': 0
+        }
+      },
+      {
+        number: 15,
+        title: 'black',
+        reactions: {
+          '+1': 1
+        }
       }
     ]
 
-    await app.bulkLabelAdd()
+    const topIssues = [
+      {
+        number: 10,
+        title: 'orange',
+        reactions: {
+          '+1': 3
+        }
+      },
+      {
+        number: 11,
+        title: 'blue',
+        reactions: {
+          '+1': 4
+        }
+      },
+      {
+        number: 12,
+        title: 'red',
+        reactions: {
+          '+1': 5
+        }
+      }
+    ]
 
-    expect(helpers.readFilePromise).toHaveBeenCalledTimes(1)
-    expect(helpers.getBulkLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.getRepoLabels).toHaveBeenCalledTimes(1)
-    expect(helpers.addShortLabelName).toHaveBeenCalledTimes(1)
-    expect(helpers.addLabel).toHaveBeenCalledTimes(0)
+    await app.labelTopIssues()
+
+    expect(helpers.createLabelInRepo).toHaveBeenCalledTimes(1)
+    expect(helpers.getIssues).toHaveBeenCalledTimes(2)
+    expect(helpers.addLabelToIssue).toHaveBeenCalledTimes(3)
+    expect(helpers.pruneOldLabels).toHaveBeenCalledTimes(1)
   })
 })
