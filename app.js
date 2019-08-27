@@ -20,9 +20,6 @@ const eventLabelColor = process.env.TOP_LABEL_COLOR
   ? process.env.TOP_LABEL_COLOR
   : 'f442c2'
 
-console.log('Args: ', numIssuesToLabel, eventLabelName, eventLabelColor)
-console.log('process.env: ', process.env)
-
 //set eventOwner and eventRepo based on action's env variables
 const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY
 const eventOwner = helpers.getOwner(eventOwnerAndRepo)
