@@ -1,0 +1,8 @@
+name: "Top Issues Labeler"
+description: "Top Issues Labeler"
+runs:
+  using: "docker"
+  image: "Dockerfile"
+branding:
+  icon: "arrow-up"
+  color: "green"
