@@ -6,14 +6,14 @@ octokit.authenticate = jest.fn()
 
 describe('getOwner', () => {
   it('should return owner when passed GITHUB_REPOSITORY env variable', () => {
-    const result = helpers.getOwner('adamzolyak/actions-playground')
-    expect(result).toBe('adamzolyak')
+    const result = helpers.getOwner('tinkurlab/actions-playground')
+    expect(result).toBe('tinkurlab')
   })
 })
 
 describe('getRepo', () => {
   it('should return repo when passed GITHUB_REPOSITORY env variable', () => {
-    const result = helpers.getRepo('adamzolyak/actions-playground')
+    const result = helpers.getRepo('tinkurlab/actions-playground')
     expect(result).toBe('actions-playground')
   })
 })
@@ -22,68 +22,64 @@ describe('createLabelInRepo', () => {
   it('creates label in repo if label does not already exist', async () => {
     const repoLabels = [
       {
-        name: 'label 1'
+        name: 'label 1',
       },
-      { name: 'label 2' }
+      { name: 'label 2' },
     ]
 
     let octokit = {
       issues: {
         listLabelsForRepo: {
           endpoint: {
-            merge: jest.fn().mockResolvedValue(repoLabels)
-          }
+            merge: jest.fn().mockResolvedValue(repoLabels),
+          },
         },
-        createLabel: jest.fn()
+        createLabel: jest.fn(),
       },
-      paginate: jest.fn().mockResolvedValue(repoLabels)
+      paginate: jest.fn().mockResolvedValue(repoLabels),
     }
 
     const result = await helpers.createLabelInRepo(
       octokit,
-      'adamzolyak',
+      'tinkurlab',
       'actions-playground',
       'new label',
       '#ffffff'
     )
 
-    expect(
-      octokit.issues.listLabelsForRepo.endpoint.merge
-    ).toHaveBeenCalledTimes(1)
+    expect(octokit.issues.listLabelsForRepo.endpoint.merge).toHaveBeenCalledTimes(1)
     expect(octokit.paginate).toHaveBeenCalledTimes(1)
     expect(octokit.issues.createLabel).toHaveBeenCalledTimes(1)
   }),
     it('does not create label in repo if label already exists', async () => {
       const repoLabels = [
         {
-          name: 'label 1'
+          name: 'label 1',
         },
-        { name: 'label 2' }
+        { name: 'label 2' },
       ]
 
       let octokit = {
         issues: {
           listLabelsForRepo: {
             endpoint: {
-              merge: jest.fn().mockResolvedValue(repoLabels)
-            }
+              merge: jest.fn().mockResolvedValue(repoLabels),
+            },
           },
-          createLabel: jest.fn()
+          createLabel: jest.fn(),
         },
-        paginate: jest.fn().mockResolvedValue(repoLabels)
+        paginate: jest.fn().mockResolvedValue(repoLabels),
       }
 
       const result = await helpers.createLabelInRepo(
         octokit,
-        'adamzolyak',
+        'tinkurlab',
         'actions-playground',
         'label 2',
         '#ffffff'
       )
 
-      expect(
-        octokit.issues.listLabelsForRepo.endpoint.merge
-      ).toHaveBeenCalledTimes(1)
+      expect(octokit.issues.listLabelsForRepo.endpoint.merge).toHaveBeenCalledTimes(1)
       expect(octokit.paginate).toHaveBeenCalledTimes(1)
       expect(octokit.issues.createLabel).toHaveBeenCalledTimes(0)
     })
@@ -94,21 +90,21 @@ describe('addLabelToIssue', () => {
     const issue = {
       labels: [
         {
-          name: 'label 1'
+          name: 'label 1',
         },
-        { name: 'label 2' }
-      ]
+        { name: 'label 2' },
+      ],
     }
 
     let octokit = {
       issues: {
-        addLabels: jest.fn()
-      }
+        addLabels: jest.fn(),
+      },
     }
 
     const result = await helpers.addLabelToIssue(
       octokit,
-      'adamzolyak',
+      'tinkurlab',
       'actions-playground',
       issue,
       'label 3'
@@ -120,21 +116,21 @@ describe('addLabelToIssue', () => {
       const issue = {
         labels: [
           {
-            name: 'label 1'
+            name: 'label 1',
           },
-          { name: 'label 2' }
-        ]
+          { name: 'label 2' },
+        ],
       }
 
       let octokit = {
         issues: {
-          addLabels: jest.fn()
-        }
+          addLabels: jest.fn(),
+        },
       }
 
       const result = await helpers.addLabelToIssue(
         octokit,
-        'adamzolyak',
+        'tinkurlab',
         'actions-playground',
         issue,
         'label 1'
@@ -151,44 +147,44 @@ describe('getTopIssues', () => {
         number: 10,
         title: 'orange',
         reactions: {
-          '+1': 3
-        }
+          '+1': 3,
+        },
       },
       {
         number: 11,
         title: 'blue',
         reactions: {
-          '+1': 4
-        }
+          '+1': 4,
+        },
       },
       {
         number: 12,
         title: 'red',
         reactions: {
-          '+1': 5
-        }
+          '+1': 5,
+        },
       },
       {
         number: 13,
         title: 'green',
         reactions: {
-          '+1': 2
-        }
+          '+1': 2,
+        },
       },
       {
         number: 14,
         title: 'purple',
         reactions: {
-          '+1': 0
-        }
+          '+1': 0,
+        },
       },
       {
         number: 15,
         title: 'black',
         reactions: {
-          '+1': 1
-        }
-      }
+          '+1': 1,
+        },
+      },
     ]
 
     const result = await helpers.getTopIssues(issues, '+1', '3')
@@ -204,44 +200,44 @@ describe('getTopIssues', () => {
           number: 10,
           title: 'orange',
           reactions: {
-            '+1': 3
-          }
+            '+1': 3,
+          },
         },
         {
           number: 11,
           title: 'blue',
           reactions: {
-            '+1': 4
-          }
+            '+1': 4,
+          },
         },
         {
           number: 12,
           title: 'red',
           reactions: {
-            '+1': 5
-          }
+            '+1': 5,
+          },
         },
         {
           number: 13,
           title: 'green',
           reactions: {
-            '+1': 2
-          }
+            '+1': 2,
+          },
         },
         {
           number: 14,
           title: 'purple',
           reactions: {
-            '+1': 0
-          }
+            '+1': 0,
+          },
         },
         {
           number: 15,
           title: 'black',
           reactions: {
-            '+1': 1
-          }
-        }
+            '+1': 1,
+          },
+        },
       ]
 
       const result = await helpers.getTopIssues(issues, '+1', '2')
@@ -260,25 +256,25 @@ describe('pruneOldLabels', () => {
         title: 'orange',
         labels: [
           {
-            name: 'label 1'
-          }
+            name: 'label 1',
+          },
         ],
         reactions: {
-          '+1': 3
-        }
+          '+1': 3,
+        },
       },
       {
         number: 11,
         title: 'blue',
         labels: [
           {
-            name: 'label 1'
-          }
+            name: 'label 1',
+          },
         ],
         reactions: {
-          '+1': 2
-        }
-      }
+          '+1': 2,
+        },
+      },
     ]
 
     const issuesWithLabel = [
@@ -287,48 +283,48 @@ describe('pruneOldLabels', () => {
         title: 'blue',
         labels: [
           {
-            name: 'label 1'
-          }
+            name: 'label 1',
+          },
         ],
         reactions: {
-          '+1': 2
-        }
+          '+1': 2,
+        },
       },
       {
         number: 12,
         title: 'aqua',
         labels: [
           {
-            name: 'label 1'
-          }
+            name: 'label 1',
+          },
         ],
         reactions: {
-          '+1': 1
-        }
+          '+1': 1,
+        },
       },
       {
         number: 13,
         title: 'brown',
         labels: [
           {
-            name: 'label 1'
-          }
+            name: 'label 1',
+          },
         ],
         reactions: {
-          '+1': 1
-        }
-      }
+          '+1': 1,
+        },
+      },
     ]
 
     let octokit = {
       issues: {
-        removeLabel: jest.fn()
-      }
+        removeLabel: jest.fn(),
+      },
     }
 
     const result = await helpers.pruneOldLabels(
       octokit,
-      'adamzolyak',
+      'tinkurlab',
       'actions-playground',
       issuesToLabel,
       issuesWithLabel,
