@@ -1,11 +1,11 @@
-FROM node:8-slim
+FROM node:14
 
 LABEL "com.github.actions.name"="Top Issues Labeler"
 LABEL "com.github.actions.description"="Labels issies with the most +1s"
 LABEL "com.github.actions.icon"="arrow-up"
 LABEL "com.github.actions.color"="green"
 
-LABEL "repository"="http://github.com/adamzolyak/top-issues-action"
+LABEL "repository"="http://github.com/tinkurlab/top-issues-action"
 LABEL "homepage"="http://www.tinkurlab.com"
 LABEL "maintainer"="Adam Zolyak <adam@tinkurlab.com>"
 

@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Label Issues
-      uses: adamzolyak/top-issues-action@master
+      uses: tinkurlab/top-issues-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TOP_NUMBER_OF_ISSUES: 10
@@ -54,4 +54,4 @@ If you have suggestions for how this GitHub Action could be improved, or want to
 
 ## License
 
-[ISC](LICENSE) © 2019 Adam Zolyak <adam@tinkurlab.com> (www.tinkurlab.com)
+[ISC](LICENSE) © 2021 Adam Zolyak <adam@tinkurlab.com> (www.tinkurlab.com)
