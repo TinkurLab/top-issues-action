@@ -36,7 +36,7 @@ node app.js
 ```
 
 5. modify contents of [/tests/fixtures/actionTrigger.json](./tests/fixtures/actionTrigger.json) as needed for test data
-6. run `bash dev` to run locally
+6. run `npm start` to run locally
 
 ## Debugging
 

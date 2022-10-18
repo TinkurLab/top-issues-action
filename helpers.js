@@ -1,50 +1,54 @@
 const fs = require('fs')
-const { request } = require('@octokit/request')
 
-module.exports.readFilePromise = function(filename) {
+module.exports.readFilePromise = function (filename) {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) reject(err)
       else resolve(data)
     })
-  }).catch(err => {
+  }).catch((err) => {
     console.log(err)
   })
 }
 
-module.exports.getOwner = function(eventOwnerAndRepo) {
+module.exports.getOwner = function (eventOwnerAndRepo) {
   const slicePos1 = eventOwnerAndRepo.indexOf('/')
   return eventOwnerAndRepo.slice(0, slicePos1)
 }
 
-module.exports.getRepo = function(eventOwnerAndRepo) {
+module.exports.getRepo = function (eventOwnerAndRepo) {
   const slicePos1 = eventOwnerAndRepo.indexOf('/')
   return eventOwnerAndRepo.slice(slicePos1 + 1, eventOwnerAndRepo.length)
 }
 
-module.exports.getIssues = async function(eventOwner, eventRepo, label) {
+module.exports.getIssues = async function (octokit, eventOwner, eventRepo, label) {
   const filterLabel = label ? label : null
 
-  let res = await request(`GET /repos/${eventOwner}/${eventRepo}/issues`, {
-    headers: {
-      authorization: `token ${process.env.GITHUB_TOKEN}`,
-      accept: 'application/vnd.github.squirrel-girl-preview'
-    },
-    labels: [filterLabel]
+  let options = octokit.issues.listForRepo.endpoint.merge({
+    owner: eventOwner,
+    repo: eventRepo,
+    labels: [filterLabel],
   })
 
-  res = res.data
+  let allIssuesForRepo = await octokit
+    .paginate(options)
+    .then((data) => {
+      return data
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 
-  res = res.filter(issue => {
+  allIssuesForRepo = allIssuesForRepo.filter((issue) => {
     if (!issue.pull_request) {
       return true
     }
   })
 
-  return res
+  return allIssuesForRepo
 }
 
-module.exports.createLabelInRepo = async function(
+module.exports.createLabelInRepo = async function (
   octokit,
   eventOwner,
   eventRepo,
@@ -53,21 +57,21 @@ module.exports.createLabelInRepo = async function(
 ) {
   const options = octokit.issues.listLabelsForRepo.endpoint.merge({
     owner: eventOwner,
-    repo: eventRepo
+    repo: eventRepo,
   })
 
-  allLabelsForRepo = await octokit
+  let allLabelsForRepo = await octokit
     .paginate(options)
-    .then(data => {
+    .then((data) => {
       return data
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err)
     })
 
   let labelExists = false
 
-  allLabelsForRepo.forEach(label => {
+  allLabelsForRepo.forEach((label) => {
     const labelName = label.name
 
     if (labelName === labelToAddName) {
@@ -80,23 +84,17 @@ module.exports.createLabelInRepo = async function(
       owner: eventOwner,
       repo: eventRepo,
       name: labelToAddName,
-      color: labelToAddColor
+      color: labelToAddColor,
     })
   }
 }
 
-module.exports.addLabelToIssue = function(
-  octokit,
-  eventOwner,
-  eventRepo,
-  issue,
-  labelToAdd
-) {
+module.exports.addLabelToIssue = function (octokit, eventOwner, eventRepo, issue, labelToAdd) {
   let existingLabels = issue.labels
 
   let labelAlreadyOnIssue = false
 
-  existingLabels.forEach(label => {
+  existingLabels.forEach((label) => {
     if (label.name === labelToAdd) {
       labelAlreadyOnIssue = true
     }
@@ -107,23 +105,23 @@ module.exports.addLabelToIssue = function(
       owner: eventOwner,
       repo: eventRepo,
       issue_number: issue.number,
-      labels: [labelToAdd]
+      labels: [labelToAdd],
     })
   }
 }
 
-module.exports.getTopIssues = async function(issues, reaction, count) {
+module.exports.getTopIssues = async function (issues, reaction, count) {
   let topIssues = issues
 
-  topIssues = topIssues.filter(issue => {
+  topIssues = topIssues.filter((issue) => {
     if (!issue.pull_request) {
       return true
     }
   })
 
-  topIssues.sort(
-    (a, b) => parseInt(b.reactions[reaction]) - parseInt(a.reactions[reaction])
-  )
+  topIssues = topIssues.filter((i) => i.reactions[reaction] > 0)
+
+  topIssues.sort((a, b) => parseInt(b.reactions[reaction]) - parseInt(a.reactions[reaction]))
 
   if (topIssues.length >= count) {
     topIssues = topIssues.slice(0, count)
@@ -132,7 +130,7 @@ module.exports.getTopIssues = async function(issues, reaction, count) {
   return topIssues
 }
 
-module.exports.pruneOldLabels = async function(
+module.exports.pruneOldLabels = async function (
   octokit,
   eventOwner,
   eventRepo,
@@ -142,10 +140,10 @@ module.exports.pruneOldLabels = async function(
 ) {
   let keepLabel
 
-  issuesWithLabel.forEach(labeledIssue => {
+  issuesWithLabel.forEach((labeledIssue) => {
     keepLabel = false
 
-    issuesToLabel.forEach(issueToLabel => {
+    issuesToLabel.forEach((issueToLabel) => {
       if (issueToLabel.number === labeledIssue.number) {
         keepLabel = true
       }
@@ -156,7 +154,7 @@ module.exports.pruneOldLabels = async function(
         owner: eventOwner,
         repo: eventRepo,
         issue_number: labeledIssue.number,
-        name: label
+        name: label,
       })
     }
   })
