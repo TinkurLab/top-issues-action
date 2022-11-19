@@ -1,6 +1,5 @@
 {
   "name": "actions_topissueslabeler",
-  "version": "0.0.1",
   "description": "A GitHub Action to label issues with the most +1s.",
   "engines": {
     "node": ">= 12.22.6"
@@ -26,7 +25,8 @@
   },
   "homepage": "https://www.tinkurlab.com",
   "dependencies": {
-    "@octokit/rest": "^16.28.7"
+    "@octokit/rest": "^16.28.7",
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "jest": "^27.5.0"

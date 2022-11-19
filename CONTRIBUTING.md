@@ -15,28 +15,16 @@ Tests are written in [Jest](https://jestjs.io/en/). Tests automatically run on c
 ### To run tests locally
 
 1. run `npm install` to install dependencies
-2. run `npm test` to run tests
+1. run `npm test` to run tests
 
 ### To run action locally
 
 1. `npm install` to install dependencies
-2. create a [Personal Access Token](https://github.com/settings/tokens) for testing if needed
-3. create a repository for testing if needed
-4. create a `dev` file with the following contents, updating the token and repository:
-
-```bash
-export GITHUB_TOKEN="12345"
-export GITHUB_REPOSITORY="adamzolyak/actions-playground"
-
-export TOP_NUMBER_OF_ISSUES="10"
-export TOP_LABEL_NAME="👍 Top 10 Issue!"
-export TOP_LABEL_COLOR="f442c2"
-
-node app.js
-```
-
-5. modify contents of [/tests/fixtures/actionTrigger.json](./tests/fixtures/actionTrigger.json) as needed for test data
-6. run `npm start` to run locally
+1. create a [Personal Access Token](https://github.com/settings/tokens) for testing if needed
+1. create a repository for testing if needed
+1. create a `.env` file similar to `.env.example`
+1. modify contents of [/tests/fixtures/actionTrigger.json](./tests/fixtures/actionTrigger.json) as needed for test data
+1. run `npm start` to run locally
 
 ## Debugging
 
