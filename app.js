@@ -1,45 +1,53 @@
-console.log('started nodejs...')
+require('dotenv').config()
+
+const packageInfo = require('./package.json')
+console.log(`Starting ${packageInfo.name}`)
 
 const helpers = require('./helpers')
 
-//require octokit rest.js
-//more info at https://github.com/octokit/rest.js
-const Octokit = require('@octokit/rest')
+const { Octokit } = require('@octokit/rest')
 const octokit = new Octokit({
   auth: `token ${process.env.GITHUB_TOKEN}`,
 })
 
-//set variables
-const numIssuesToLabel = process.env.TOP_NUMBER_OF_ISSUES ? process.env.TOP_NUMBER_OF_ISSUES : '10'
-const eventLabelName = process.env.TOP_LABEL_NAME ? process.env.TOP_LABEL_NAME : '👍 Top 10 Issue'
-const eventLabelColor = process.env.TOP_LABEL_COLOR ? process.env.TOP_LABEL_COLOR : 'f442c2'
-
-//set eventOwner and eventRepo based on action's env variables
-const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY
-const eventOwner = helpers.getOwner(eventOwnerAndRepo)
-const eventRepo = helpers.getRepo(eventOwnerAndRepo)
-
 async function labelTopIssues() {
-  await helpers.createLabelInRepo(octokit, eventOwner, eventRepo, eventLabelName, eventLabelColor)
+  try {
+    //set variables
+    const numIssuesToLabel = process.env.TOP_NUMBER_OF_ISSUES || '10'
+    const eventLabelName = process.env.TOP_LABEL_NAME || '👍 Top 10 Issue'
+    const eventLabelColor = process.env.TOP_LABEL_COLOR || 'f442c2'
 
-  const issues = await helpers.getIssues(octokit, eventOwner, eventRepo)
+    //set eventOwner and eventRepo based on action's env variables
+    const eventOwnerAndRepo = process.env.GITHUB_REPOSITORY
+    const eventOwner = helpers.getOwner(eventOwnerAndRepo)
+    const eventRepo = helpers.getRepo(eventOwnerAndRepo)
 
-  let issuesToLabel = await helpers.getTopIssues(issues, '+1', numIssuesToLabel)
+    await helpers.createLabelInRepo(octokit, eventOwner, eventRepo, eventLabelName, eventLabelColor)
 
-  issuesToLabel.forEach((issue) => {
-    helpers.addLabelToIssue(octokit, eventOwner, eventRepo, issue, eventLabelName)
-  })
+    const issues = await helpers.getIssues(octokit, eventOwner, eventRepo)
 
-  const issuesWithLabel = await helpers.getIssues(octokit, eventOwner, eventRepo, eventLabelName)
+    let issuesToLabel = await helpers.getTopIssues(issues, '+1', numIssuesToLabel)
 
-  helpers.pruneOldLabels(
-    octokit,
-    eventOwner,
-    eventRepo,
-    issuesToLabel,
-    issuesWithLabel,
-    eventLabelName
-  )
+    if (issuesToLabel) {
+      issuesToLabel.forEach((issue) => {
+        console.log('labeling issue #: ', issue.number)
+        helpers.addLabelToIssue(octokit, eventOwner, eventRepo, issue, eventLabelName)
+      })
+    }
+
+    const issuesWithLabel = await helpers.getIssues(octokit, eventOwner, eventRepo, eventLabelName)
+
+    helpers.pruneOldLabels(
+      octokit,
+      eventOwner,
+      eventRepo,
+      issuesToLabel,
+      issuesWithLabel,
+      eventLabelName
+    )
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 //run the function
