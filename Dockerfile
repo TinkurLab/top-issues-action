@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:16
 
 LABEL "com.github.actions.name"="Top Issues Labeler"
 LABEL "com.github.actions.description"="Labels issies with the most +1s"
